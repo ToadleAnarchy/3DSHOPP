@@ -1,0 +1,19 @@
+body {
+  font-family: Arial;
+  margin: 2em;
+}
+
+label {
+  font-weight: bold;
+}
+
+input, textarea {
+  margin-bottom: 1em;
+  width: 100%;
+  max-width: 400px;
+}
+
+button {
+  padding: 0.5em 1em;
+  font-size: 1em;
+}
