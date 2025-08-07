@@ -2,34 +2,36 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const app = express();
 
+const app = express();
 const upload = multer({ dest: "uploads/" });
 
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
-app.post("/submit-request", upload.single("stlFile"), (req, res) => {
-  const { name, email, description } = req.body;
-  const file = req.file;
+// Serve homepage
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
-  const requestData = {
-    name,
-    email,
-    description,
-    file: file.originalname,
-    storedFile: file.path,
-    time: new Date().toISOString()
+// Handle form submission
+app.post("/submit-request", upload.single("stlFile"), (req, res) => {
+  const formData = {
+    name: req.body.name,
+    email: req.body.email,
+    description: req.body.description,
+    file: req.file ? req.file.originalname : "No file uploaded"
   };
 
-  const dataPath = path.join(__dirname, "requests.json");
-  const requests = fs.existsSync(dataPath)
-    ? JSON.parse(fs.readFileSync(dataPath))
-    : [];
-  requests.push(requestData);
-  fs.writeFileSync(dataPath, JSON.stringify(requests, null, 2));
-
-  res.send("Request submitted! I'll talk to you soon about the payment.");
+  const logEntry = JSON.stringify(formData) + "\n";
+  fs.appendFile("requests.txt", logEntry, (err) => {
+    if (err) {
+      console.error("Failed to save request:", err);
+      res.status(500).send("Failed to save request.");
+    } else {
+      res.send("Request received successfully!");
+    }
+  });
 });
 
 const PORT = process.env.PORT || 3000;
